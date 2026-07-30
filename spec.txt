@@ -1,0 +1,58 @@
+Design Document: tpt-e-node
+Project: TPT Embedded Node (Device Firmware SDK)
+Status: Draft / Phase 1
+Target Audience: Embedded Engineers, IoT Hobbyists, Hardware Prototypers
+1. Executive Summary
+tpt-e-node is the device-side runtime and Hardware Abstraction Layer (HAL) SDK for the TPT ecosystem. While tpt-e-link defines the language, tpt-e-node provides the muscle and brain for the physical hardware.
+It is structured as a Rust workspace that allows hobbyists to flash a pre-built template in 5 minutes, while giving engineers a memory-safe, no_std environment to build custom, production-grade firmware for ESP32 and RISC-V architectures.
+2. Goals and Non-Goals
+Goals:
+5-Minute "TPT-Ready" Setup: A hobbyist should be able to clone a template, flash it, and see their device instantly recognized and mapped in tpt-basestation.
+Architecture Agnosticism: The core runtime logic (state machines, command handling) must be identical whether running on an ESP32 (Xtensa/RISC-V) or a generic RISC-V chip.
+Memory Safety: Leverage Rust's no_std ecosystem to eliminate buffer overflows and memory leaks common in C/C++ embedded development.
+Composable Capabilities: Allow users to easily "register" hardware features (like a filesystem or a sensor) so the node automatically advertises them to BaseStation.
+Non-Goals:
+Protocol Definition: tpt-e-node does not define the byte-level protocol; it strictly uses tpt-e-link.
+Replacing ESP-IDF/Arduino: We are not building a massive monolithic framework. We are building a lightweight, interoperable layer that can coexist with or replace existing toolchains.
+3. Core Architecture (Workspace Structure)
+The repository is organized as a Cargo workspace to separate pure logic from hardware-specific implementations.
+
+tpt-e-node/
+├── Cargo.toml                 # Workspace root
+├── crates/
+│   ├── tpt-node-core/         # The architecture-agnostic runtime & state machines.
+│   ├── tpt-node-esp32/        # ESP32 specific HAL (UART, BLE, Flash) using `esp-hal`.
+│   └── tpt-node-riscv/        # Generic RISC-V HAL using `riscv-rt` and `embedded-hal`.
+└── templates/
+    ├── esp32-blinky/          # `cargo-generate` template for ESP32 hobbyists.
+    └── riscv-sensor/          # `cargo-generate` template for RISC-V hobbyists.
+
+A. tpt-node-core (The Runtime)
+This crate contains the "brains" of the device. It has no knowledge of specific silicon.
+The Reactor / Event Loop: An asynchronous task loop that listens to the tpt-e-link transport for incoming Commands and dispatches them.
+Capability Registry: A system where user code registers features
+
+// Example user code
+node.register_capability(Capability::LittleFS(my_fs_driver));
+node.register_capability(Capability::Telemetry(my_sensor_reader));
+
+Internal Handlers: Built-in logic for standard capabilities. If Capability::OTA is registered, tpt-node-core automatically handles the chunked download, CRC verification, and flash writing without the user writing boilerplate.
+B. tpt-node-esp32 & tpt-node-riscv (The Muscle)
+These crates implement the tpt-e-link::LinkTransport trait for specific hardware.
+ESP32: Wraps esp-hal to provide UART and BLE transports. Handles ESP-specific partition tables and LittleFS flash bindings.
+RISC-V: Wraps embedded-hal traits to provide UART transports for generic RISC-V chips (like GD32V or SiFive).
+4. Integration with tpt-e-link and tpt-basestation
+Boot Sequence: When the physical chip powers on, tpt-node-core initializes the hardware via the specific HAL crate (e.g., tpt-node-esp32).
+Handshake: It constructs a DeviceManifest (from tpt-e-link), populates it with the registered capabilities, and broadcasts it.
+BaseStation Sync: tpt-basestation receives the manifest, verifies it via tpt-e-link, and dynamically renders the UI (e.g., unlocking the Filesystem card because the node registered Capability::LittleFS).
+Runtime: The user's custom logic runs alongside the tpt-node-core reactor, seamlessly sending telemetry and receiving commands over the established tpt-e-link connection.
+5. The "Mock-First" Developer Experience
+To fulfill the ecosystem's mock-first philosophy, tpt-e-node will include a tpt-node-mock binary.
+This is a standard std Rust binary that implements the LinkTransport trait using local WebSockets.
+It registers fake capabilities (e.g., a simulated LittleFS using the host's local hard drive).
+Result: An engineer can write and test their device logic, OTA flows, and telemetry streaming entirely on their laptop, interacting with tpt-basestation, before ever compiling for a physical microcontroller.
+6. Implementation Roadmap
+Phase 1: Set up the Cargo workspace. Port the LinkTransport trait from tpt-e-link and build the tpt-node-core event loop using a lightweight no_std async executor (like embassy-executor).
+Phase 2: Implement tpt-node-esp32. Get a physical ESP32-C3 (RISC-V) to successfully perform the handshake with a mock BaseStation.
+Phase 3: Implement the internal OTA and LittleFS handlers in tpt-node-core.
+Phase 4: Create the cargo-generate templates and write the "5-Minute Quickstart" documentation.
