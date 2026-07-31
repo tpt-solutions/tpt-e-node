@@ -116,12 +116,17 @@ This starts a WebSocket-based mock transport that connects to tpt-basestation, l
 
 ## Roadmap
 
+See [`todo.md`](todo.md) for the authoritative, phase-by-phase checklist. Summary:
+
 | Phase | Focus | Status |
 |-------|-------|--------|
-| **Phase 1** | Cargo workspace setup, `LinkTransport` trait, `tpt-node-core` event loop (`embassy-executor`) | 🟡 In Progress |
-| **Phase 2** | `tpt-node-esp32` implementation, ESP32-C3 handshake with mock BaseStation | ⏳ Planned |
-| **Phase 3** | Internal OTA & LittleFS handlers in `tpt-node-core` | ⏳ Planned |
-| **Phase 4** | `cargo-generate` templates, "5-Minute Quickstart" docs | ⏳ Planned |
+| **Phase 0** | `tpt-e-link` dependency (path-based co-development) | ✅ Done |
+| **Phase 1** | Cargo workspace, `tpt-node-core` reactor, capability registry, internal OTA handler | ✅ Done |
+| **Phase 2** | Two-layer manifest integration (wire ↔ `tpt-basestation` host manifest) — see [`docs/manifest-mapping.md`](docs/manifest-mapping.md) | ✅ Done |
+| **Phase 3** | Mock-first dev experience: `tpt-node-mock` over WebSocket, BaseStation-side listener & UI wiring | ✅ Done |
+| **Phase 4** | `tpt-node-esp32` HAL (UART/BLE transports, OTA/LittleFS flash bindings) | ⏳ Planned |
+| **Phase 5** | `tpt-node-riscv` generic HAL | ⏳ Planned |
+| **Phase 6** | `cargo-generate` templates, "5-Minute Quickstart" docs | ⏳ Planned |
 
 ---
 

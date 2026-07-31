@@ -1,0 +1,17 @@
+[package]
+name = "tpt-node-riscv"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Generic RISC-V HAL for TPT Embedded Node — UART transport via riscv-rt + embedded-hal."
+license.workspace = true
+
+[features]
+std = []
+
+[dependencies]
+tpt-node-core = { path = "../tpt-node-core" }
+tpt-e-link = { workspace = true }
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

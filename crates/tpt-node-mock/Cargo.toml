@@ -1,0 +1,24 @@
+[package]
+name = "tpt-node-mock"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Mock-first TPT device: a std binary implementing LinkTransport over WebSocket with fake, host-backed capabilities."
+license.workspace = true
+
+[dependencies]
+tpt-node-core = { path = "../tpt-node-core", features = ["std"] }
+tpt-e-link = { workspace = true }
+heapless = { workspace = true }
+tungstenite = { version = "0.24", default-features = false, features = ["handshake"] }
+pollster = "1"
+
+[dev-dependencies]
+tempfile = "3"
+tpt-basestation-core = { path = "../../../tpt-basestation/core" }
+tpt-basestation-hal = { path = "../../../tpt-basestation/hal" }
+tokio = { version = "1", features = ["full"] }
+futures-util = "0.3"
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }

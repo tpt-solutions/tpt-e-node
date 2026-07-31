@@ -1,0 +1,26 @@
+[package]
+name = "tpt-node-core"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+description = "Architecture-agnostic runtime and state machines for TPT Embedded Node devices."
+license.workspace = true
+
+[dependencies]
+tpt-e-link = { workspace = true }
+heapless = { workspace = true }
+postcard = { workspace = true }
+crc = "3"
+
+[features]
+default = []
+std = ["tpt-e-link/std"]
+
+[dev-dependencies]
+pollster = "1"
+crc = "3"
+heapless = { version = "0.8", features = ["serde"] }
+tpt-e-link = { workspace = true, features = ["std"] }
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
