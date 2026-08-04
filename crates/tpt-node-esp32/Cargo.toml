@@ -3,37 +3,122 @@ name = "tpt-node-esp32"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
-description = "ESP32 HAL for TPT Embedded Node — UART/BLE/Flash transports via tpt-embedded-core."
+description = "ESP32 HAL for TPT Embedded Node — UART/BLE transports, flash-backed OTA and LittleFS via tpt-embedded-core primitives."
 license.workspace = true
 
 [features]
-std = []
-# Real hardware support. Not a default feature: `cargo build --workspace` on
-# a host target must keep working without pulling in esp-hal (which targets
-# `riscv32imc-unknown-none-elf`/xtensa only). Build/flash with e.g.
-# `cargo build -p tpt-node-esp32 --release --target riscv32imc-unknown-none-elf --features esp32c3`.
-esp32c3 = [
+default = []
+std = ["tpt-e-link/std"]
+# Real hardware support. At most one chip feature may be enabled. Each enables
+# the esp-hal stack, the `tpt-e-typestate-hal` safe DMA/ISR layer, and the
+# `esp-storage` flash binding for that chip. Not default: `cargo build
+# --workspace` on a host target must keep working without pulling in esp-hal
+# (which only targets `riscv32imc-unknown-none-elf`/xtensa). Build/flash with
+# e.g. `cargo build -p tpt-node-esp32 --release --target
+# riscv32imc-unknown-none-elf --features esp32c3`.
+esp32 = [
     "dep:esp-hal",
+    "esp-hal/esp32",
     "dep:esp-hal-embassy",
+    "esp-hal-embassy/esp32",
     "dep:esp-backtrace",
+    "esp-backtrace/esp32",
     "dep:esp-println",
+    "esp-println/esp32",
     "dep:esp-alloc",
     "dep:embassy-executor",
+    "dep:tpt-e-typestate-hal",
+    "tpt-e-typestate-hal/use_esp_hal",
+    "tpt-e-typestate-hal/esp32",
+    "dep:esp-storage",
+    "esp-storage/esp32",
+    "esp-storage/critical-section",
+    "esp-storage/nor-flash",
+]
+esp32s3 = [
+    "dep:esp-hal",
+    "esp-hal/esp32s3",
+    "dep:esp-hal-embassy",
+    "esp-hal-embassy/esp32s3",
+    "dep:esp-backtrace",
+    "esp-backtrace/esp32s3",
+    "dep:esp-println",
+    "esp-println/esp32s3",
+    "dep:esp-alloc",
+    "dep:embassy-executor",
+    "dep:tpt-e-typestate-hal",
+    "tpt-e-typestate-hal/use_esp_hal",
+    "tpt-e-typestate-hal/esp32s3",
+    "dep:esp-storage",
+    "esp-storage/esp32s3",
+    "esp-storage/critical-section",
+    "esp-storage/nor-flash",
+]
+esp32c3 = [
+    "dep:esp-hal",
     "esp-hal/esp32c3",
+    "dep:esp-hal-embassy",
     "esp-hal-embassy/esp32c3",
+    "dep:esp-backtrace",
     "esp-backtrace/esp32c3",
+    "dep:esp-println",
     "esp-println/esp32c3",
+    "dep:esp-alloc",
+    "dep:embassy-executor",
+    "dep:tpt-e-typestate-hal",
+    "tpt-e-typestate-hal/use_esp_hal",
+    "tpt-e-typestate-hal/esp32c3",
+    "dep:esp-storage",
+    "esp-storage/esp32c3",
+    "esp-storage/critical-section",
+    "esp-storage/nor-flash",
+]
+esp32c6 = [
+    "dep:esp-hal",
+    "esp-hal/esp32c6",
+    "dep:esp-hal-embassy",
+    "esp-hal-embassy/esp32c6",
+    "dep:esp-backtrace",
+    "esp-backtrace/esp32c6",
+    "dep:esp-println",
+    "esp-println/esp32c6",
+    "dep:esp-alloc",
+    "dep:embassy-executor",
+    "dep:tpt-e-typestate-hal",
+    "tpt-e-typestate-hal/use_esp_hal",
+    "tpt-e-typestate-hal/esp32c6",
+    "dep:esp-storage",
+    "esp-storage/esp32c6",
+    "esp-storage/critical-section",
+    "esp-storage/nor-flash",
+]
+# Real `littlefs2`-backed filesystem driver. Host/test-only for now:
+# littlefs2 builds the littlefs C library via the `cc` crate, so it cannot
+# cross-compile to the `riscv32imc` embedded target without a RISC-V C
+# toolchain on the build machine.
+fs = [
+    "dep:littlefs2",
 ]
 
 [dependencies]
 tpt-node-core = { path = "../tpt-node-core" }
 tpt-e-link = { workspace = true }
+heapless = { workspace = true }
+embedded-storage = "0.3"
 embassy-executor = { workspace = true, optional = true }
 esp-hal = { version = "0.22", default-features = false, optional = true }
 esp-hal-embassy = { version = "0.5", default-features = false, optional = true }
 esp-backtrace = { version = "0.15", default-features = false, features = ["exception-handler", "panic-handler", "println"], optional = true }
 esp-println = { version = "0.13", default-features = false, features = ["uart"], optional = true }
 esp-alloc = { version = "0.5", optional = true }
+tpt-e-typestate-hal = { path = "../../../tpt-embedded-core/crates/tpt-e-typestate-hal", default-features = false, optional = true }
+esp-storage = { version = "0.5", default-features = false, optional = true }
+littlefs2 = { version = "0.8", default-features = false, optional = true }
+
+[dev-dependencies]
+pollster = "1"
+crc = { workspace = true }
+littlefs2 = { version = "0.8", default-features = false }
 
 [lints.clippy]
 all = { level = "warn", priority = -1 }
