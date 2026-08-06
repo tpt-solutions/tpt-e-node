@@ -358,16 +358,3 @@ mod tests {
         assert!(!ack.success);
     }
 }
-
-#[test]
-fn debug_print_fresh_entries() {
-    let mut driver = new_formatted();
-    let entries = driver.list_dir("/").expect("list");
-    eprintln!("DEBUG fresh root entries = {:?}", entries);
-    for e in entries.iter() {
-        eprintln!("DEBUG name bytes = {:?}", e.as_bytes());
-    }
-    driver.write_file("/a", 0, b"x").expect("w");
-    let entries = driver.list_dir("/").expect("list");
-    eprintln!("DEBUG after write = {:?}", entries);
-}

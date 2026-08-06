@@ -68,23 +68,48 @@ so this doesn't duplicate or conflict with work already in progress in sibling r
       > and discovery pipeline, drives a LittleFS write command end-to-end, and asserts capability
       > gating.
 
-## Phase 4 — ESP32 HAL (`tpt-node-esp32`, built on `tpt-embedded-core`)
+## Phase 4 — ESP32 HAL (`tpt-node-esp32`, built on `tpt-embedded-core`) — done
 
 > Decision: reuse `tpt-embedded-core`'s formally-verified, `no_std` ESP32 primitives instead of
 > wrapping `esp-hal` from scratch.
 
-- [ ] Add `tpt-e-typestate-hal` (covers `esp32`/`esp32s3`/`esp32c3`/`esp32c6`, i.e. both Xtensa
+- [x] Add `tpt-e-typestate-hal` (covers `esp32`/`esp32s3`/`esp32c3`/`esp32c6`, i.e. both Xtensa
       and RISC-V ESP32 variants) as a dependency of `tpt-node-esp32`.
-- [ ] Evaluate and pull in relevant sibling crates as needed: `tpt-e-chronos` (ring buffer /
-      DMA handoff), `tpt-e-cipher` (constant-time crypto), `tpt-e-slumber` (deep-sleep state
-      machine).
-- [ ] Implement `tpt-e-link::LinkTransport` for UART using `tpt-e-typestate-hal` primitives.
-- [ ] Implement BLE transport for ESP32 (new work — not covered by `tpt-embedded-core`).
-- [ ] Wire the internal OTA handler (from Phase 1) to real ESP32 partition tables / flash
-      writes.
-- [ ] Implement LittleFS flash bindings for ESP32.
-- [ ] Milestone: a physical ESP32-C3 (RISC-V core) completes a full handshake with a mock
+- [x] Evaluate relevant sibling crates: `tpt-e-chronos` (ring buffer / DMA handoff),
+      `tpt-e-cipher` (constant-time crypto), `tpt-e-slumber` (deep-sleep state machine).
+      > Decision: none pulled in for this phase. They cover telemetry DMA, HW crypto and sleep
+      > power-states — none of which the transport/OTA/LittleFS/BLE deliverables below need.
+      > Revisit `tpt-e-chronos` if/when a real `Telemetry` capability driver is added, and
+      > `tpt-e-cipher` if OTA images need signature verification beyond the CRC32 check.
+- [x] Implement `tpt-e-link::LinkTransport` for UART directly on `esp-hal`'s interrupt-backed
+      async `Uart` (`transport::uart::UartTransport`), plus a blocking variant
+      (`BlockingUartTransport`) for executor-free bring-up.
+      > `tpt-e-typestate-hal` targets DMA/ISR-heavy peripherals (see its `aes_dma`/`dma`/`isr`
+      > modules); a plain interrupt-backed UART byte transport doesn't need typestate-checked
+      > DMA, so it's built directly on `esp-hal`. The dependency stays wired in for device
+      > firmware that does need it (e.g. telemetry DMA via `tpt-e-chronos` later).
+- [x] Implement BLE transport for ESP32 (new work — not covered by `tpt-embedded-core`):
+      `ble::BleTransport` over a `BleStream` byte-pipe trait; the concrete NimBLE/esp-wifi GATT
+      adapter is left to the application layer pending an esp-wifi release that matches the
+      pinned esp-hal 0.22 stack (see `ble.rs` module docs).
+- [x] Wire the internal OTA handler (from Phase 1) to real ESP32 partition tables / flash
+      writes: `flash::OtaRegionFlashWriter` streams chunks straight to `esp-storage` flash with
+      an incremental CRC32, no full-image RAM buffering.
+- [x] Implement LittleFS flash bindings for ESP32: `littlefs::EspLittleFsDriver` (feature `fs`),
+      `littlefs2` over a `RegionStorage` flash-region view.
+- [x] Milestone: a physical ESP32-C3 (RISC-V core) completes a full handshake with a mock
       BaseStation.
+      > Verified 2026-08-06 against a real ESP32-C3 (rev v0.4) on its native USB-Serial-JTAG
+      > port (no external USB-UART bridge): added `transport::usb_serial_jtag::UsbSerialJtagTransport`
+      > and the `usb_serial_jtag_node` bring-up example (classic-ESP32 UART bring-up stays
+      > covered by the pre-existing `uart_node` example). Flashed via `espflash`; the boot-time
+      > `Handshake` broadcast (`device_id = "esp32c3"`) and a live `Command`/`Ack` round trip via
+      > `tpt-node-mock`'s `mock_basestation` host tool were both confirmed over the wire.
+      > Along the way, fixed real bugs the milestone exposed: missing `T: 'static` bounds on
+      > `UartTransport`/`BlockingUartTransport` (wouldn't compile for real hardware at all), a
+      > dev-dependency (`pollster`) leaking into every example build regardless of use (fixed via
+      > `[target.'cfg(not(target_os = "none"))'.dev-dependencies]`), `heap_allocator!` invoked
+      > outside a function body, and a missing `#[esp_hal::entry]` on `fn main`.
 
 ## Phase 5 — Generic RISC-V HAL (`tpt-node-riscv`)
 
@@ -116,4 +141,9 @@ so this doesn't duplicate or conflict with work already in progress in sibling r
 - `tpt-basestation/gui/src/cards/registry.tsx`, `gui/src/hooks/useCapabilityGate.ts` —
   capability-gated UI wired to WebSocket-discovered devices (Phase 3, done)
 - `tpt-embedded-core/crates/tpt-e-typestate-hal` (+ `tpt-e-chronos`, `tpt-e-cipher`,
-  `tpt-e-slumber`) — HAL/primitives to depend on for `tpt-node-esp32` (Phase 4, not started)
+  `tpt-e-slumber`) — HAL/primitives evaluated for `tpt-node-esp32`; only `tpt-e-typestate-hal`
+  pulled in so far (Phase 4, done)
+- `crates/tpt-node-esp32/src/{transport/uart,transport/usb_serial_jtag,ble,flash,littlefs,crc}.rs`,
+  `crates/tpt-node-esp32/examples/{uart_node,usb_serial_jtag_node}.rs` — UART/USB-Serial-JTAG/BLE
+  transports, flash-backed OTA + LittleFS, and the hardware bring-up binaries used for the C3
+  milestone (Phase 4, done)

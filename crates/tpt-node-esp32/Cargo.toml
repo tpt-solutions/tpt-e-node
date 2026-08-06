@@ -116,9 +116,28 @@ esp-storage = { version = "0.5", default-features = false, optional = true }
 littlefs2 = { version = "0.8", default-features = false, optional = true }
 
 [dev-dependencies]
+# `target_os = "none"` (bare-metal ELF targets, e.g. `riscv32imc-unknown-none-elf`
+# / `xtensa-esp32-none-elf`) excludes these: Cargo pulls dev-dependencies into
+# every dev-profile artifact for the package, including examples, regardless
+# of whether that particular example uses them — so unscoped `std`-requiring
+# dev-deps like `pollster` break embedded example builds even though only the
+# host-only `#[cfg(test)]` modules reference them.
+[target.'cfg(not(target_os = "none"))'.dev-dependencies]
 pollster = "1"
 crc = { workspace = true }
-littlefs2 = { version = "0.8", default-features = false }
+
+# Hardware bring-up binary; only buildable with esp-hal pulled in, and only
+# targets the classic ESP32 (Xtensa) pinout it hard-codes. Gated so a plain
+# `cargo build/test --workspace` on a host target doesn't try to compile it.
+[[example]]
+name = "uart_node"
+required-features = ["esp32"]
+
+# Bring-up binary for C3 boards that only break out the native USB port (no
+# external USB-UART bridge), e.g. most ESP32-C3-DevKitM/DevKitC boards.
+[[example]]
+name = "usb_serial_jtag_node"
+required-features = ["esp32c3"]
 
 [lints.clippy]
 all = { level = "warn", priority = -1 }

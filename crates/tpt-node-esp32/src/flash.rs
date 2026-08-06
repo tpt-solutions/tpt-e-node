@@ -326,8 +326,8 @@ mod tests {
         assert!(writer.verify(reference_crc(&image)).expect("verify"));
 
         let flash = writer.into_inner();
-        assert_eq!(&flash.bytes()[..image.len()], &image[..]);
-        assert!(flash.bytes()[image.len()..].iter().all(|&b| b == 0xFF));
+        assert_eq!(&flash.bytes()[4096..4096 + image.len()], &image[..]);
+        assert!(flash.bytes()[4096 + image.len()..].iter().all(|&b| b == 0xFF));
     }
 
     #[test]
@@ -346,7 +346,7 @@ mod tests {
 
         assert!(writer.verify(reference_crc(&image)).expect("verify"));
         let flash = writer.into_inner();
-        assert_eq!(&flash.bytes()[..image.len()], &image[..]);
+        assert_eq!(&flash.bytes()[4096..4096 + image.len()], &image[..]);
     }
 
     #[test]

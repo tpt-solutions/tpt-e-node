@@ -12,6 +12,7 @@ tpt-e-link = { workspace = true }
 heapless = { workspace = true }
 tungstenite = { version = "0.24", default-features = false, features = ["handshake"] }
 pollster = "1"
+serialport = "4"
 
 [dev-dependencies]
 tempfile = "3"
