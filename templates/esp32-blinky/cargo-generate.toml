@@ -1,0 +1,17 @@
+[cargo-generate]
+template = "TPT ESP32 Blinky"
+keywords = ["tpt", "esp32", "embedded", "firmware"]
+include = ["Cargo.toml", "src/**/*", "README.md"]
+
+[placeholders.project-name]
+prompt = "What is your project's name? (kebab-case, e.g. my-esp32-device)"
+regex = "^[a-z0-9-]+$"
+
+[placeholders.chip]
+prompt = "Which ESP32 chip? (esp32 / esp32s3 / esp32c3 / esp32c6)"
+choices = ["esp32", "esp32s3", "esp32c3", "esp32c6"]
+regular = true
+
+[placeholders.device-id]
+prompt = "8-char device id broadcast at boot (exactly 8 bytes, e.g. esp32bl1)"
+regex = "^.{8}$"

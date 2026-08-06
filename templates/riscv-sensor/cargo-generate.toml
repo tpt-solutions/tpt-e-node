@@ -1,0 +1,17 @@
+[cargo-generate]
+template = "TPT RISC-V Sensor"
+keywords = ["tpt", "riscv", "sensor", "embedded", "firmware"]
+include = ["Cargo.toml", "src/**/*", "README.md"]
+
+[placeholders.project-name]
+prompt = "What is your project's name? (kebab-case, e.g. my-riscv-sensor)"
+regex = "^[a-z0-9-]+$"
+
+[placeholders.chip]
+prompt = "Which RISC-V chip family? (gd32v / sifive)"
+choices = ["gd32v", "sifive"]
+regular = true
+
+[placeholders.device-id]
+prompt = "8-char device id broadcast at boot (exactly 8 bytes, e.g. rvsen001)"
+regex = "^.{8}$"

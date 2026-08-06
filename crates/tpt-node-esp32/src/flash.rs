@@ -41,7 +41,7 @@ const MAX_FLASH_WINDOW: usize = 256;
 
 /// Rounds `v` up to the next multiple of `a`.
 const fn align_up(v: u32, a: u32) -> u32 {
-    (v + a - 1) / a * a
+    v.div_ceil(a) * a
 }
 
 /// A compile-time `[BASE, BASE + LEN)` sub-region view over a `NorFlash`
@@ -69,6 +69,11 @@ impl<S, const BASE: u32, const LEN: u32> RegionStorage<S, BASE, LEN> {
     /// Length of this region in bytes.
     pub const fn len(&self) -> u32 {
         LEN
+    }
+
+    /// Whether this region is empty (zero length).
+    pub const fn is_empty(&self) -> bool {
+        LEN == 0
     }
 
     /// Consumes the wrapper and returns the underlying storage.

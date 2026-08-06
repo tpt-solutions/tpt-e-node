@@ -138,6 +138,7 @@ impl LittleFsDriver for HostLittleFsDriver {
         }
         let mut file = std::fs::OpenOptions::new()
             .create(true)
+            .truncate(true)
             .write(true)
             .open(&path)
             .map_err(|_| NodeError::Io)?;

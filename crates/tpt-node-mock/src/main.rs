@@ -1,6 +1,6 @@
 //! `tpt-node-mock` — run a real TPT node on a laptop over WebSocket.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::time::Duration;
 
 use tpt_e_link::{Arch, Version};
@@ -38,7 +38,7 @@ fn main() {
 
 async fn run_once(
     url: &str,
-    root: &PathBuf,
+    root: &Path,
     device_id: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let transport = WsTransport::connect(url)?;
@@ -50,7 +50,7 @@ async fn run_once(
     let mut node = Node::new(transport, id, Version::new(0, 1, 0), Arch::Esp32C3RiscV);
     node.register_capability(Capability::Ota)?;
     node.register_capability(Capability::LittleFs(Box::new(
-        HostLittleFsDriver::new(root.clone()),
+        HostLittleFsDriver::new(root.to_path_buf()),
     )))?;
     node.register_capability(Capability::Telemetry(Box::new(MockTelemetryDriver)))?;
     node.register_capability(Capability::Serial)?;

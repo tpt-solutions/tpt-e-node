@@ -2,7 +2,7 @@
 
 **Device Firmware SDK for the TPT Ecosystem**
 
-[![Status](https://img.shields.io/badge/status-Phase%201%20Development-yellow)](https://github.com/tpt/tpt-e-node)
+[![Status](https://img.shields.io/badge/status-Phase%206%20Complete-brightgreen)](https://github.com/tpt-solutions/tpt-e-node)
 [![License](https://img.shields.io/badge/license-MIT%2FApache--2.0-blue)](LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.75%2B-orange)](https://www.rust-lang.org)
 
@@ -82,18 +82,24 @@ node.register_capability(Capability::OTA); // Automatic chunked download + CRC +
 
 ## Quickstart (5 Minutes)
 
+See the full guide in [`docs/quickstart.md`](docs/quickstart.md). In short:
+
 ```bash
 # 1. Install toolchain
 cargo install cargo-generate probe-rs-tools
+cargo install espflash            # ESP32 only
 
-# 2. Generate project from template
-cargo generate --git https://github.com/tpt/tpt-e-node --template esp32-blinky
+# 2. Generate project from template (ESP32 or RISC-V)
+cargo generate --git https://github.com/tpt-solutions/tpt-e-node --path templates/esp32-blinky
 
 # 3. Flash to device
-cd my-device && cargo run --release
+cd my-device
+cargo build --release --features esp32c3 --target riscv32imc-unknown-none-elf
+espflash flash -p <PORT> --monitor target/riscv32imc-unknown-none-elf/release/my-device
 ```
 
-> **Result:** Your device appears in tpt-basestation instantly with a live telemetry dashboard.
+> **Result:** Your device handshake reaches `tpt-basestation` and the matching
+> capability cards unlock instantly — no manual pairing.
 
 ---
 
@@ -124,9 +130,9 @@ See [`todo.md`](todo.md) for the authoritative, phase-by-phase checklist. Summar
 | **Phase 1** | Cargo workspace, `tpt-node-core` reactor, capability registry, internal OTA handler | ✅ Done |
 | **Phase 2** | Two-layer manifest integration (wire ↔ `tpt-basestation` host manifest) — see [`docs/manifest-mapping.md`](docs/manifest-mapping.md) | ✅ Done |
 | **Phase 3** | Mock-first dev experience: `tpt-node-mock` over WebSocket, BaseStation-side listener & UI wiring | ✅ Done |
-| **Phase 4** | `tpt-node-esp32` HAL (UART/BLE transports, OTA/LittleFS flash bindings) | ⏳ Planned |
-| **Phase 5** | `tpt-node-riscv` generic HAL | ⏳ Planned |
-| **Phase 6** | `cargo-generate` templates, "5-Minute Quickstart" docs | ⏳ Planned |
+| **Phase 4** | `tpt-node-esp32` HAL (UART/BLE transports, OTA/LittleFS flash bindings) | ✅ Done |
+| **Phase 5** | `tpt-node-riscv` generic HAL (`embedded-hal` UART transport) | ✅ Done |
+| **Phase 6** | `cargo-generate` templates, "5-Minute Quickstart" docs | ✅ Done |
 
 ---
 

@@ -1,0 +1,25 @@
+[package]
+name = "esp32-blinky"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+
+[dependencies]
+tpt-node-core = { path = "../../crates/tpt-node-core" }
+tpt-node-esp32 = { path = "../../crates/tpt-node-esp32", default-features = false }
+tpt-e-link = { path = "../../../tpt-e-link" }
+esp-hal = { version = "0.22", default-features = false }
+esp-backtrace = { version = "0.15", default-features = false, features = ["exception-handler", "panic-handler", "println"] }
+esp-println = { version = "0.13", default-features = false, features = ["uart"] }
+esp-alloc = "0.5"
+
+[features]
+# Select your exact ESP32 part here (only one at a time).
+esp32 = ["tpt-node-esp32/esp32", "esp-hal/esp32", "esp-backtrace/esp32", "esp-println/esp32"]
+esp32s3 = ["tpt-node-esp32/esp32s3", "esp-hal/esp32s3", "esp-backtrace/esp32s3", "esp-println/esp32s3"]
+esp32c3 = ["tpt-node-esp32/esp32c3", "esp-hal/esp32c3", "esp-backtrace/esp32c3", "esp-println/esp32c3"]
+esp32c6 = ["tpt-node-esp32/esp32c6", "esp-hal/esp32c6", "esp-backtrace/esp32c6", "esp-println/esp32c6"]
+
+[profile.release]
+opt-level = "z"
+lto = true

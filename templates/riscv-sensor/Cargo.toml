@@ -1,0 +1,23 @@
+[package]
+name = "riscv-sensor"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+
+[dependencies]
+tpt-node-core = { path = "../../crates/tpt-node-core" }
+tpt-node-riscv = { path = "../../crates/tpt-node-riscv", default-features = false }
+tpt-e-link = { path = "../../../tpt-e-link" }
+embedded-hal = "1"
+riscv = "0.11"
+riscv-rt = "0.13"
+gd32vf103xx-hal = { version = "0.5", optional = true }
+
+[features]
+# Select your exact RISC-V part here (only one at a time).
+gd32v = ["tpt-node-riscv/gd32v", "dep:gd32vf103xx-hal"]
+sifive = ["tpt-node-riscv/sifive"]
+
+[profile.release]
+opt-level = "z"
+lto = true
