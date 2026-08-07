@@ -5,6 +5,10 @@ edition.workspace = true
 rust-version.workspace = true
 description = "Mock-first TPT device: a std binary implementing LinkTransport over WebSocket with fake, host-backed capabilities."
 license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["embedded", "mock", "iot", "testing", "tpt"]
+categories = ["development-tools", "embedded", "simulation"]
 
 [dependencies]
 tpt-node-core = { path = "../tpt-node-core", features = ["std"] }

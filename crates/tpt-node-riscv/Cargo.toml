@@ -5,6 +5,10 @@ edition.workspace = true
 rust-version.workspace = true
 description = "Generic RISC-V HAL for TPT Embedded Node — UART transport via riscv-rt + embedded-hal."
 license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["embedded", "riscv", "iot", "no-std", "tpt"]
+categories = ["embedded", "hardware-support", "no-std"]
 
 [features]
 default = []

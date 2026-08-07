@@ -5,6 +5,10 @@ edition.workspace = true
 rust-version.workspace = true
 description = "Architecture-agnostic runtime and state machines for TPT Embedded Node devices."
 license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["embedded", "no-std", "iot", "ota", "tpt"]
+categories = ["embedded", "no-std", "hardware-support"]
 
 [dependencies]
 tpt-e-link = { workspace = true }

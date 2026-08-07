@@ -5,6 +5,10 @@ edition.workspace = true
 rust-version.workspace = true
 description = "ESP32 HAL for TPT Embedded Node — UART/BLE transports, flash-backed OTA and LittleFS via tpt-embedded-core primitives."
 license.workspace = true
+repository.workspace = true
+readme = "README.md"
+keywords = ["embedded", "esp32", "iot", "ota", "tpt"]
+categories = ["embedded", "hardware-support", "no-std"]
 
 [features]
 default = []

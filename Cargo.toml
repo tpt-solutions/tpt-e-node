@@ -19,7 +19,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/tpt-solutions/tpt-e-node"
 
 [workspace.dependencies]
-tpt-e-link = { path = "../tpt-e-link" }
+tpt-e-link = { path = "../tpt-e-link", version = "0.1.0" }
 heapless = { version = "0.8", features = ["serde"] }
 postcard = "1"
 crc = "3"
